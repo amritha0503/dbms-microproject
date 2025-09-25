@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-user"></i> My Profile</h2>
+    
+    {% if student %}
+    <form method="POST" action="{{ url_for('update_student_profile') }}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Name:</label>
+                <input type="text" class="form-control" value="{{ student[1] }}" disabled>
+                <small style="color: #666;">Name cannot be changed</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email:</label>
+                <input type="email" class="form-control" value="{{ student[2] }}" disabled>
+                <small style="color: #666;">Email cannot be changed</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-graduation-cap"></i> Department:</label>
+                <input type="text" class="form-control" value="{{ student[4] }}" disabled>
+                <small style="color: #666;">Department cannot be changed</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-star"></i> CGPA:</label>
+                <input type="text" class="form-control" value="{{ student[5] }}" disabled>
+                <small style="color: #666;">CGPA is managed by admin</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-calendar"></i> Graduation Year:</label>
+                <input type="text" class="form-control" value="{{ student[6] }}" disabled>
+                <small style="color: #666;">Graduation year cannot be changed</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Phone Number:</label>
+                <input type="tel" name="phone" class="form-control" 
+                       value="{{ student[7] if student[7] else '' }}" 
+                       placeholder="Enter your phone number">
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label><i class="fas fa-map-marker-alt"></i> Address:</label>
+                <textarea name="address" class="form-control" rows="3" 
+                          placeholder="Enter your complete address">{{ student[8] if student[8] else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-file"></i> Resume:</label>
+                <input type="text" class="form-control" 
+                       value="{{ student[9] if student[9] else 'Not uploaded' }}" disabled>
+                <small style="color: #666;">Resume upload feature coming soon</small>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-info-circle"></i> Status:</label>
+                <span class="status-badge status-{{ student[10].lower() if student[10] else 'active' }}">
+                    {{ student[10] or 'Active' }}
+                </span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Profile
+            </button>
+            <a href="{{ url_for('student_dashboard') }}" class="btn" style="color: #667eea; margin-left: 1rem;">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </form>
+
+    <!-- Account Information -->
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #eee;">
+        <h3 style="color: #555; margin-bottom: 1rem;">
+            <i class="fas fa-info-circle"></i> Account Information
+        </h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem; color: #666;">
+            <div>
+                <strong>Account Created:</strong><br>
+                {{ student[11].strftime('%d %B %Y at %I:%M %p') if student[11] else 'Not available' }}
+            </div>
+            <div>
+                <strong>Student ID:</strong><br>
+                #{{ student[0] }}
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div style="text-align: center; color: #666; padding: 2rem;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <h3>Profile not found</h3>
+        <p>There was an error loading your profile information.</p>
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

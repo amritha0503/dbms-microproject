@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+    <p>Welcome, <strong>{{ session.user_name }}</strong>! Here's your placement management overview.</p>
+</div>
+
+<!-- Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ total_students or 0 }}</div>
+        <div class="stat-label">Total Students</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_companies or 0 }}</div>
+        <div class="stat-label">Companies</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ active_jobs or 0 }}</div>
+        <div class="stat-label">Active Jobs</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ total_applications or 0 }}</div>
+        <div class="stat-label">Applications</div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <a href="{{ url_for('manage_students') }}" class="btn btn-primary" style="text-decoration: none; padding: 1.5rem; text-align: center;">
+            <i class="fas fa-users" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+            <strong>Manage Students</strong><br>
+            <small>View and manage student records</small>
+        </a>
+        <a href="{{ url_for('manage_companies') }}" class="btn btn-success" style="text-decoration: none; padding: 1.5rem; text-align: center;">
+            <i class="fas fa-building" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+            <strong>Manage Companies</strong><br>
+            <small>Add and manage company profiles</small>
+        </a>
+        <a href="{{ url_for('manage_jobs') }}" class="btn btn-info" style="text-decoration: none; padding: 1.5rem; text-align: center;">
+            <i class="fas fa-briefcase" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+            <strong>Manage Jobs</strong><br>
+            <small>Post and manage job openings</small>
+        </a>
+        <a href="{{ url_for('manage_applications') }}" class="btn btn-warning" style="text-decoration: none; padding: 1.5rem; text-align: center;">
+            <i class="fas fa-file-alt" style="font-size: 2rem; display: block; margin-bottom: 0.5rem;"></i>
+            <strong>Review Applications</strong><br>
+            <small>Process student applications</small>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Applications -->
+<div class="card">
+    <h2><i class="fas fa-clock"></i> Recent Applications</h2>
+    {% if recent_applications %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Company</th>
+                        <th>Job Title</th>
+                        <th>Applied On</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in recent_applications %}
+                    <tr>
+                        <td>{{ app[1] }}</td>
+                        <td>{{ app[2] }}</td>
+                        <td>{{ app[3] }}</td>
+                        <td>{{ app[4].strftime('%d %b %Y') if app[4] else 'N/A' }}</td>
+                        <td>
+                            <span class="status-badge status-{{ app[5].lower() if app[5] else 'applied' }}">
+                                {{ app[5] or 'Applied' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if app[5] == 'Applied' %}
+                                <a href="{{ url_for('update_application_status', app_id=app[0], status='Shortlisted') }}" 
+                                   class="btn btn-success btn-sm" title="Shortlist">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                                <a href="{{ url_for('update_application_status', app_id=app[0], status='Rejected') }}" 
+                                   class="btn btn-danger btn-sm" title="Reject"
+                                   onclick="return confirm('Are you sure you want to reject this application?')">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            {% elif app[5] == 'Shortlisted' %}
+                                <a href="{{ url_for('update_application_status', app_id=app[0], status='Selected') }}" 
+                                   class="btn btn-success btn-sm" title="Select">
+                                    <i class="fas fa-star"></i>
+                                </a>
+                                <a href="{{ url_for('update_application_status', app_id=app[0], status='Rejected') }}" 
+                                   class="btn btn-danger btn-sm" title="Reject"
+                                   onclick="return confirm('Are you sure you want to reject this application?')">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <a href="{{ url_for('manage_applications') }}" class="btn btn-primary">
+                <i class="fas fa-eye"></i> View All Applications
+            </a>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">
+            <i class="fas fa-inbox"></i><br><br>
+            No applications received yet.
+        </p>
+    {% endif %}
+</div>
+
+<!-- System Overview -->
+<div class="card">
+    <h2><i class="fas fa-chart-bar"></i> System Overview</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 1rem;">
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745;">
+            <h4 style="color: #28a745; margin-bottom: 1rem;">
+                <i class="fas fa-users"></i> Student Management
+            </h4>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-success"></i> View student profiles</li>
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-success"></i> Track academic performance</li>
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-success"></i> Monitor placement status</li>
+            </ul>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #007bff;">
+            <h4 style="color: #007bff; margin-bottom: 1rem;">
+                <i class="fas fa-building"></i> Company Relations
+            </h4>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-primary"></i> Maintain company database</li>
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-primary"></i> Manage job postings</li>
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-primary"></i> Coordinate interviews</li>
+            </ul>
+        </div>
+
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <h4 style="color: #ffc107; margin-bottom: 1rem;">
+                <i class="fas fa-cog"></i> Process Management
+            </h4>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-warning"></i> Application tracking</li>
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-warning"></i> Interview scheduling</li>
+                <li style="margin: 0.5rem 0;"><i class="fas fa-check text-warning"></i> Result management</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

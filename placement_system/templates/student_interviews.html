@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}My Interviews - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-calendar-alt"></i> My Interviews</h2>
+    <p>Track all your scheduled interviews and their results.</p>
+    
+    {% if interviews %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Job Title</th>
+                        <th>Interview Date</th>
+                        <th>Type</th>
+                        <th>Location</th>
+                        <th>Result</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interview in interviews %}
+                    <tr>
+                        <td>{{ interview[1] }}</td>
+                        <td>{{ interview[2] }}</td>
+                        <td>
+                            {% if interview[3] %}
+                                {{ interview[3].strftime('%d %b %Y') }}<br>
+                                <small style="color: #666;">{{ interview[3].strftime('%I:%M %p') }}</small>
+                            {% else %}
+                                Not scheduled
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span style="background: #e3f2fd; color: #1976d2; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+                                {{ interview[4] }}
+                            </span>
+                        </td>
+                        <td>{{ interview[5] or 'TBD' }}</td>
+                        <td>
+                            {% if interview[6] == 'Passed' %}
+                                <span class="status-badge" style="background-color: #e8f5e8; color: #388e3c;">
+                                    <i class="fas fa-check"></i> Passed
+                                </span>
+                            {% elif interview[6] == 'Failed' %}
+                                <span class="status-badge" style="background-color: #ffebee; color: #d32f2f;">
+                                    <i class="fas fa-times"></i> Failed
+                                </span>
+                            {% else %}
+                                <span class="status-badge" style="background-color: #fff3e0; color: #f57c00;">
+                                    <i class="fas fa-clock"></i> Pending
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if interview[7] %}
+                                <div style="max-width: 200px; white-space: normal;">
+                                    {{ interview[7] }}
+                                </div>
+                            {% else %}
+                                <span style="color: #999; font-style: italic;">No feedback yet</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Interview Tips -->
+        <div style="margin-top: 2rem; background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
+            <h4 style="color: #2c3e50; margin-bottom: 1rem;">
+                <i class="fas fa-lightbulb"></i> Interview Tips
+            </h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+                <div>
+                    <strong><i class="fas fa-clock"></i> Before Interview:</strong>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                        <li>Research the company thoroughly</li>
+                        <li>Review your resume and projects</li>
+                        <li>Prepare answers for common questions</li>
+                        <li>Test your internet connection (if online)</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong><i class="fas fa-user-tie"></i> During Interview:</strong>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                        <li>Dress professionally</li>
+                        <li>Maintain eye contact</li>
+                        <li>Listen carefully to questions</li>
+                        <li>Ask thoughtful questions</li>
+                    </ul>
+                </div>
+                <div>
+                    <strong><i class="fas fa-handshake"></i> After Interview:</strong>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                        <li>Send a thank-you email</li>
+                        <li>Follow up if no response</li>
+                        <li>Reflect on your performance</li>
+                        <li>Continue applying to other jobs</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div style="text-align: center; color: #666; padding: 3rem;">
+            <i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 1rem; color: #ddd;"></i>
+            <h3>No Interviews Scheduled</h3>
+            <p>You don't have any interviews scheduled yet.</p>
+            <p style="margin-top: 1rem;">Keep applying to jobs and you'll get interview calls soon!</p>
+            <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary" style="margin-top: 1rem;">
+                <i class="fas fa-briefcase"></i> View Available Jobs
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 1rem;">
+    <a href="{{ url_for('student_dashboard') }}" class="btn" style="color: #667eea;">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

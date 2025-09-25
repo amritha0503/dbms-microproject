@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Jobs - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-briefcase"></i> Manage Jobs</h2>
+    
+    <!-- Add New Job Form -->
+    <div style="background: #f8f9fa; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h3 style="color: #555; margin-bottom: 1rem;">
+            <i class="fas fa-plus"></i> Post New Job
+        </h3>
+        <form method="POST" action="{{ url_for('add_job') }}">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="company_id">Company*</label>
+                    <select name="company_id" id="company_id" class="form-control" required>
+                        <option value="">Select Company</option>
+                        {% for company in companies %}
+                        <option value="{{ company[0] }}">{{ company[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="job_title">Job Title*</label>
+                    <input type="text" name="job_title" id="job_title" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="salary_package">Salary Package (₹)</label>
+                    <input type="number" name="salary_package" id="salary_package" class="form-control" 
+                           min="0" step="1000" placeholder="e.g., 600000">
+                </div>
+                <div class="form-group">
+                    <label for="location">Location*</label>
+                    <input type="text" name="location" id="location" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="min_cgpa">Minimum CGPA*</label>
+                    <input type="number" name="min_cgpa" id="min_cgpa" class="form-control" 
+                           min="0" max="10" step="0.1" value="6.0" required>
+                </div>
+                <div class="form-group">
+                    <label for="job_type">Job Type*</label>
+                    <select name="job_type" id="job_type" class="form-control" required>
+                        <option value="Full-time">Full-time</option>
+                        <option value="Part-time">Part-time</option>
+                        <option value="Internship">Internship</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="job_description">Job Description*</label>
+                    <textarea name="job_description" id="job_description" class="form-control" 
+                              rows="4" required placeholder="Describe the job role, responsibilities, and requirements..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="required_skills">Required Skills</label>
+                    <textarea name="required_skills" id="required_skills" class="form-control" 
+                              rows="2" placeholder="e.g., Python, JavaScript, React, SQL"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="application_deadline">Application Deadline*</label>
+                    <input type="date" name="application_deadline" id="application_deadline" 
+                           class="form-control" required>
+                </div>
+            </div>
+            <div style="text-align: center;">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Post Job
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Jobs List -->
+    {% if jobs %}
+        <h3 style="color: #555; margin-bottom: 1rem;">
+            <i class="fas fa-list"></i> Posted Jobs ({{ jobs|length }})
+        </h3>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job ID</th>
+                        <th>Company</th>
+                        <th>Job Title</th>
+                        <th>Package</th>
+                        <th>Location</th>
+                        <th>Min CGPA</th>
+                        <th>Type</th>
+                        <th>Deadline</th>
+                        <th>Status</th>
+                        <th>Posted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td>#{{ job[0] }}</td>
+                        <td>{{ job[13] }}</td>
+                        <td>
+                            <strong>{{ job[2] }}</strong>
+                            {% if job[3] %}
+                                <br><small style="color: #666;">{{ job[3][:80] }}{% if job[3]|length > 80 %}...{% endif %}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if job[4] %}
+                                <strong style="color: #28a745;">₹{{ "{:,.0f}".format(job[4]) }}</strong>
+                            {% else %}
+                                <span style="color: #999;">Not disclosed</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ job[5] }}</td>
+                        <td>
+                            <span style="font-weight: bold; color: #667eea;">{{ job[7] }}</span>
+                        </td>
+                        <td>
+                            <span style="background: #e3f2fd; color: #1976d2; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem;">
+                                {{ job[9] }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if job[10] %}
+                                {{ job[10].strftime('%d %b %Y') }}
+                                {% if job[10] < today %}
+                                    <br><small style="color: #dc3545;">Expired</small>
+                                {% endif %}
+                            {% else %}
+                                <span style="color: #999;">No deadline</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ job[11].lower() if job[11] else 'open' }}">
+                                {{ job[11] or 'Open' }}
+                            </span>
+                        </td>
+                        <td>{{ job[12].strftime('%d %b %Y') if job[12] else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Job Statistics -->
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #555; margin-bottom: 1rem;">
+                <i class="fas fa-chart-line"></i> Job Statistics
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #388e3c; margin-bottom: 0.5rem;">
+                        {{ jobs|selectattr('11', 'equalto', 'Open')|list|length }}
+                    </div>
+                    <div style="color: #555; font-weight: 600;">Open Jobs</div>
+                </div>
+                <div style="background: #ffebee; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #d32f2f; margin-bottom: 0.5rem;">
+                        {{ jobs|selectattr('11', 'equalto', 'Closed')|list|length }}
+                    </div>
+                    <div style="color: #555; font-weight: 600;">Closed Jobs</div>
+                </div>
+                <div style="background: #e3f2fd; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #1976d2; margin-bottom: 0.5rem;">
+                        {{ jobs|selectattr('9', 'equalto', 'Full-time')|list|length }}
+                    </div>
+                    <div style="color: #555; font-weight: 600;">Full-time</div>
+                </div>
+                <div style="background: #fff3e0; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: #f57c00; margin-bottom: 0.5rem;">
+                        {{ jobs|selectattr('9', 'equalto', 'Internship')|list|length }}
+                    </div>
+                    <div style="color: #555; font-weight: 600;">Internships</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary Range Analysis -->
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #555; margin-bottom: 1rem;">
+                <i class="fas fa-money-bill-wave"></i> Salary Range Analysis
+            </h3>
+            {% set jobs_with_salary = jobs|selectattr('4')|list %}
+            {% if jobs_with_salary %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #388e3c;">
+                            ₹{{ "{:,.0f}".format(jobs_with_salary|max(attribute=4)) }}
+                        </div>
+                        <div style="color: #555; font-size: 0.9rem;">Highest Package</div>
+                    </div>
+                    <div style="background: #fff3e0; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #f57c00;">
+                            ₹{{ "{:,.0f}".format(jobs_with_salary|sum(attribute=4) / jobs_with_salary|length) }}
+                        </div>
+                        <div style="color: #555; font-size: 0.9rem;">Average Package</div>
+                    </div>
+                    <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.2rem; font-weight: bold; color: #1976d2;">
+                            ₹{{ "{:,.0f}".format(jobs_with_salary|min(attribute=4)) }}
+                        </div>
+                        <div style="color: #555; font-size: 0.9rem;">Lowest Package</div>
+                    </div>
+                </div>
+            {% else %}
+                <p style="color: #666; text-align: center;">No salary information available for posted jobs.</p>
+            {% endif %}
+        </div>
+
+    {% else %}
+        <div style="text-align: center; color: #666; padding: 3rem;">
+            <i class="fas fa-briefcase" style="font-size: 3rem; margin-bottom: 1rem; color: #ddd;"></i>
+            <h3>No Jobs Posted</h3>
+            <p>Post your first job using the form above.</p>
+        </div>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 1rem;">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn" style="color: #667eea;">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<script>
+// Set minimum date to today for application deadline
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('application_deadline').min = today;
+    
+    // Set default deadline to 30 days from now
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 30);
+    document.getElementById('application_deadline').value = futureDate.toISOString().split('T')[0];
+});
+</script>
+{% endblock %}

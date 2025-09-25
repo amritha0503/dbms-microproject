@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Students - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-users"></i> Manage Students</h2>
+    
+    {% if students %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>CGPA</th>
+                        <th>Graduation Year</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>#{{ student[0] }}</td>
+                        <td>{{ student[1] }}</td>
+                        <td>{{ student[2] }}</td>
+                        <td>{{ student[4] }}</td>
+                        <td>
+                            {% if student[5] >= 8.0 %}
+                                <span style="font-weight: bold; color: #28a745;">
+                            {% elif student[5] >= 7.0 %}
+                                <span style="font-weight: bold; color: #ffc107;">
+                            {% else %}
+                                <span style="font-weight: bold; color: #dc3545;">
+                            {% endif %}
+                                {{ student[5] }}
+                            </span>
+                        </td>
+                        <td>{{ student[6] }}</td>
+                        <td>{{ student[7] if student[7] else 'Not provided' }}</td>
+                        <td>
+                            <span class="status-badge status-{{ student[10].lower() if student[10] else 'active' }}">
+                                {{ student[10] or 'Active' }}
+                            </span>
+                        </td>
+                        <td>{{ student[11].strftime('%d %b %Y') if student[11] else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Student Statistics -->
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #555; margin-bottom: 1rem;">
+                <i class="fas fa-chart-pie"></i> Student Statistics
+            </h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">
+                        {{ students|selectattr('5', '>=', 8.0)|list|length }}
+                    </div>
+                    <div style="color: #555; font-size: 0.9rem;">CGPA ≥ 8.0</div>
+                </div>
+                <div style="background: #fff3e0; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;">
+                        {{ students|selectattr('5', '>=', 7.0)|selectattr('5', '<', 8.0)|list|length }}
+                    </div>
+                    <div style="color: #555; font-size: 0.9rem;">CGPA 7.0-8.0</div>
+                </div>
+                <div style="background: #ffebee; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #dc3545;">
+                        {{ students|selectattr('5', '<', 7.0)|list|length }}
+                    </div>
+                    <div style="color: #555; font-size: 0.9rem;">CGPA < 7.0</div>
+                </div>
+                <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #1976d2;">
+                        {{ students|selectattr('10', 'equalto', 'Placed')|list|length }}
+                    </div>
+                    <div style="color: #555; font-size: 0.9rem;">Placed Students</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department-wise Breakdown -->
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #555; margin-bottom: 1rem;">
+                <i class="fas fa-graduation-cap"></i> Department-wise Breakdown
+            </h3>
+            <div class="table-container">
+                {% set departments = students|map(attribute='4')|unique|list %}
+                <table style="width: auto; margin: 0;">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Total Students</th>
+                            <th>Avg CGPA</th>
+                            <th>Placed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dept in departments %}
+                        {% set dept_students = students|selectattr('4', 'equalto', dept)|list %}
+                        <tr>
+                            <td>{{ dept }}</td>
+                            <td>{{ dept_students|length }}</td>
+                            <td>
+                                {% set avg_cgpa = (dept_students|sum(attribute=5) / dept_students|length)|round(2) %}
+                                {% if avg_cgpa >= 8.0 %}
+                                    <span style="font-weight: bold; color: #28a745;">{{ avg_cgpa }}</span>
+                                {% elif avg_cgpa >= 7.0 %}
+                                    <span style="font-weight: bold; color: #ffc107;">{{ avg_cgpa }}</span>
+                                {% else %}
+                                    <span style="font-weight: bold; color: #dc3545;">{{ avg_cgpa }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ dept_students|selectattr('10', 'equalto', 'Placed')|list|length }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    {% else %}
+        <div style="text-align: center; color: #666; padding: 3rem;">
+            <i class="fas fa-user-slash" style="font-size: 3rem; margin-bottom: 1rem; color: #ddd;"></i>
+            <h3>No Students Found</h3>
+            <p>No students are currently registered in the system.</p>
+        </div>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin-top: 1rem;">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn" style="color: #667eea;">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+{% endblock %}

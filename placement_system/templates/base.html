@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Placement Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    {% if session.user_id %}
+    <header class="header">
+        <div class="container">
+            <h1><i class="fas fa-graduation-cap"></i> Placement System</h1>
+            <nav class="nav-links">
+                {% if session.user_type == 'student' %}
+                    <a href="{{ url_for('student_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
+                    <a href="{{ url_for('student_interviews') }}"><i class="fas fa-calendar-alt"></i> Interviews</a>
+                {% elif session.user_type == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    <a href="{{ url_for('manage_students') }}"><i class="fas fa-users"></i> Students</a>
+                    <a href="{{ url_for('manage_companies') }}"><i class="fas fa-building"></i> Companies</a>
+                    <a href="{{ url_for('manage_jobs') }}"><i class="fas fa-briefcase"></i> Jobs</a>
+                    <a href="{{ url_for('manage_applications') }}"><i class="fas fa-file-alt"></i> Applications</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout ({{ session.user_name }})</a>
+            </nav>
+        </div>
+    </header>
+    {% endif %}
+
+    <main>
+        <div class="container">
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Placement Management System. Built with Flask & MySQL.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

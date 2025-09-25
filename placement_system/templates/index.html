@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Placement System{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <h2><i class="fas fa-graduation-cap"></i> Placement Management System</h2>
+        <p style="text-align: center; margin-bottom: 2rem; color: #666;">
+            Connecting Students with Career Opportunities
+        </p>
+        
+        <div style="text-align: center;">
+            <a href="{{ url_for('login') }}" class="btn btn-primary" style="width: 100%; display: block; margin-bottom: 1rem;">
+                <i class="fas fa-sign-in-alt"></i> Login to Continue
+            </a>
+        </div>
+        
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee;">
+            <h4 style="text-align: center; margin-bottom: 1rem; color: #555;">System Features</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9rem;">
+                <div style="text-align: center;">
+                    <i class="fas fa-user-graduate" style="color: #667eea; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <p><strong>Students</strong></p>
+                    <p>Apply for jobs, track applications, manage profile</p>
+                </div>
+                <div style="text-align: center;">
+                    <i class="fas fa-user-cog" style="color: #764ba2; font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <p><strong>Admins</strong></p>
+                    <p>Manage companies, jobs, and placement process</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

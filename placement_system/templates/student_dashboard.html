@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-tachometer-alt"></i> Student Dashboard</h2>
+    <p>Welcome, <strong>{{ session.user_name }}</strong>! Here's your placement overview.</p>
+</div>
+
+<!-- Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ applications|length }}</div>
+        <div class="stat-label">Total Applications</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">{{ available_jobs|length }}</div>
+        <div class="stat-label">Available Jobs</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">
+            {% set selected_count = applications|selectattr('5', 'equalto', 'Selected')|list|length %}
+            {{ selected_count }}
+        </div>
+        <div class="stat-label">Selected</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">
+            {% if student_profile %}{{ student_profile[4] }}{% else %}N/A{% endif %}
+        </div>
+        <div class="stat-label">Current CGPA</div>
+    </div>
+</div>
+
+<!-- My Applications -->
+<div class="card">
+    <h2><i class="fas fa-file-alt"></i> My Applications</h2>
+    {% if applications %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Job Title</th>
+                        <th>Package</th>
+                        <th>Applied On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>{{ app[1] }}</td>
+                        <td>{{ app[2] }}</td>
+                        <td>₹{{ "{:,.0f}".format(app[3]) if app[3] else 'Not disclosed' }}</td>
+                        <td>{{ app[4].strftime('%d %b %Y') if app[4] else 'N/A' }}</td>
+                        <td>
+                            <span class="status-badge status-{{ app[5].lower() if app[5] else 'applied' }}">
+                                {{ app[5] or 'Applied' }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">
+            <i class="fas fa-inbox"></i><br><br>
+            You haven't applied to any jobs yet. Check out available jobs below!
+        </p>
+    {% endif %}
+</div>
+
+<!-- Available Jobs -->
+<div class="card">
+    <h2><i class="fas fa-briefcase"></i> Available Jobs</h2>
+    {% if available_jobs %}
+        <div style="display: grid; gap: 1rem;">
+            {% for job in available_jobs %}
+            <div class="job-card">
+                <div class="job-title">{{ job[2] }}</div>
+                <div class="company-name">{{ job[1] }}</div>
+                
+                <div class="job-details">
+                    <div class="job-detail">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>₹{{ "{:,.0f}".format(job[3]) if job[3] else 'Not disclosed' }}</span>
+                    </div>
+                    <div class="job-detail">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>{{ job[4] or 'Location not specified' }}</span>
+                    </div>
+                    <div class="job-detail">
+                        <i class="fas fa-star"></i>
+                        <span>Min CGPA: {{ job[5] }}</span>
+                    </div>
+                    <div class="job-detail">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Apply by: {{ job[6].strftime('%d %b %Y') if job[6] else 'No deadline' }}</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 1rem;">
+                    {% set already_applied = applications|selectattr('2', 'equalto', job[2])|list %}
+                    {% if already_applied %}
+                        <span class="btn btn-info btn-sm" style="cursor: not-allowed; opacity: 0.6;">
+                            <i class="fas fa-check"></i> Already Applied
+                        </span>
+                    {% else %}
+                        {% if student_profile and student_profile[4] >= job[5] %}
+                            <a href="{{ url_for('apply_for_job', job_id=job[0]) }}" 
+                               class="btn btn-success btn-sm"
+                               onclick="return confirm('Are you sure you want to apply for this job?')">
+                                <i class="fas fa-paper-plane"></i> Apply Now
+                            </a>
+                        {% else %}
+                            <span class="btn btn-warning btn-sm" style="cursor: not-allowed; opacity: 0.6;">
+                                <i class="fas fa-exclamation-triangle"></i> CGPA Requirement Not Met
+                            </span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center; color: #666; padding: 2rem;">
+            <i class="fas fa-search"></i><br><br>
+            No jobs are currently available. Please check back later!
+        </p>
+    {% endif %}
+</div>
+{% endblock %}
