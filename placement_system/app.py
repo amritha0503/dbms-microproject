@@ -3,18 +3,20 @@ import mysql.connector
 from datetime import datetime, date
 import hashlib
 from functools import wraps
+import os
+from config import DATABASE_CONFIG
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # Change this to a random secret key
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your_secret_key_here')  # Use environment variable
 
 # Database connection configuration
 def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",        # your MySQL username
-        password="amritha@2005",  # your MySQL password
-        database="placement_db"    # the DB you created
-    )
+    try:
+        connection = mysql.connector.connect(**DATABASE_CONFIG)
+        return connection
+    except mysql.connector.Error as err:
+        print(f"Database connection error: {err}")
+        raise
 
 # Authentication decorators
 def login_required(f):
@@ -49,6 +51,20 @@ def student_required(f):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/health')
+def health_check():
+    """Health check endpoint for deployment monitoring"""
+    try:
+        db = get_db_connection()
+        cursor = db.cursor()
+        cursor.execute("SELECT 1")
+        cursor.fetchone()
+        cursor.close()
+        db.close()
+        return jsonify({"status": "healthy", "database": "connected"}), 200
+    except Exception as e:
+        return jsonify({"status": "unhealthy", "error": str(e)}), 500
 
 @app.route('/login', methods=['GET', 'POST'])
 @app.route('/login/<user_type>', methods=['GET', 'POST'])
@@ -1609,4 +1625,8 @@ def download_resume(filename):
 
 # ✅ Run Flask
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=os.getenv('FLASK_ENV') != 'production')
+
+# For Vercel deployment
+def handler(request):
+    return app(request.environ, lambda status, headers: None)
