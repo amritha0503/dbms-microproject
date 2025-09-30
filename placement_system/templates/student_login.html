@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Student Login - Placement System{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <h2><i class="fas fa-user-graduate"></i> Student Portal</h2>
+        
+        <!-- Login/Register Toggle -->
+        <div style="display: flex; margin-bottom: 2rem; border-radius: 5px; overflow: hidden; background: #f8f9fa;">
+            <button type="button" onclick="showLogin()" id="loginTab" class="tab-btn active" style="flex: 1; padding: 1rem; border: none; background: #667eea; color: white; cursor: pointer;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button type="button" onclick="showRegister()" id="registerTab" class="tab-btn" style="flex: 1; padding: 1rem; border: none; background: #f8f9fa; color: #666; cursor: pointer;">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <form method="POST" action="{{ url_for('student_login') }}">
+                <input type="hidden" name="action" value="login">
+                
+                <div class="form-group">
+                    <label for="login_email"><i class="fas fa-envelope"></i> Email:</label>
+                    <input type="email" name="email" id="login_email" 
+                           class="form-control" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login_password"><i class="fas fa-lock"></i> Password:</label>
+                    <input type="password" name="password" id="login_password" 
+                           class="form-control" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Login as Student
+                </button>
+            </form>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <div style="background: #e8f4f8; padding: 1rem; border-radius: 5px; font-size: 0.9rem;">
+                    <strong>Demo Student Login:</strong><br>
+                    Email: alice@student.com<br>
+                    Password: alice123
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" style="display: none;">
+            <form method="POST" action="{{ url_for('student_login') }}">
+                <input type="hidden" name="action" value="register">
+                
+                <div class="form-group">
+                    <label for="reg_name"><i class="fas fa-user"></i> Full Name:</label>
+                    <input type="text" name="name" id="reg_name" 
+                           class="form-control" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_email"><i class="fas fa-envelope"></i> Email:</label>
+                    <input type="email" name="email" id="reg_email" 
+                           class="form-control" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_phone"><i class="fas fa-phone"></i> Phone:</label>
+                    <input type="tel" name="phone" id="reg_phone" 
+                           class="form-control" placeholder="Enter your phone number" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_department"><i class="fas fa-graduation-cap"></i> Department:</label>
+                    <select name="department" id="reg_department" class="form-control" required>
+                        <option value="">Select Department</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Electrical">Electrical</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_cgpa"><i class="fas fa-chart-line"></i> CGPA:</label>
+                    <input type="number" name="cgpa" id="reg_cgpa" step="0.01" min="0" max="10"
+                           class="form-control" placeholder="Enter your CGPA (e.g., 8.5)" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_graduation_year"><i class="fas fa-calendar"></i> Graduation Year:</label>
+                    <select name="graduation_year" id="reg_graduation_year" class="form-control" required>
+                        <option value="">Select Year</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_password"><i class="fas fa-lock"></i> Password:</label>
+                    <input type="password" name="password" id="reg_password" 
+                           class="form-control" placeholder="Create a password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_confirm_password"><i class="fas fa-lock"></i> Confirm Password:</label>
+                    <input type="password" name="confirm_password" id="reg_confirm_password" 
+                           class="form-control" placeholder="Confirm your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-success" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> Register as Student
+                </button>
+            </form>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="{{ url_for('index') }}" class="btn btn-info btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function showLogin() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginTab').classList.add('active');
+    document.getElementById('registerTab').classList.remove('active');
+    document.getElementById('loginTab').style.background = '#667eea';
+    document.getElementById('loginTab').style.color = 'white';
+    document.getElementById('registerTab').style.background = '#f8f9fa';
+    document.getElementById('registerTab').style.color = '#666';
+}
+
+function showRegister() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('registerTab').classList.add('active');
+    document.getElementById('loginTab').classList.remove('active');
+    document.getElementById('registerTab').style.background = '#28a745';
+    document.getElementById('registerTab').style.color = 'white';
+    document.getElementById('loginTab').style.background = '#f8f9fa';
+    document.getElementById('loginTab').style.color = '#666';
+}
+</script>
+{% endblock %}

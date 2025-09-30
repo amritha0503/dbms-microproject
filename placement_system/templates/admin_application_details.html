@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Application Details - {{ application[2] }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2><i class="fas fa-user-graduate"></i> Application Details</h2>
+        <a href="{{ url_for('manage_applications') }}" class="btn btn-info btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Applications
+        </a>
+    </div>
+
+    <div style="display: grid; gap: 2rem;">
+        <!-- Application Header -->
+        <div class="application-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 2rem; border-radius: 10px;">
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center;">
+                <div>
+                    <h1 style="margin: 0; font-size: 2rem;">{{ application[2] }}</h1>
+                    <h3 style="margin: 0.5rem 0; opacity: 0.9;">Applied for {{ application[9] }} at {{ application[8] }}</h3>
+                    <p style="margin: 0; opacity: 0.8;">Application ID: #{{ application[0] }}</p>
+                </div>
+                <div style="text-align: right;">
+                    <div class="status-badge-large status-{{ application[14].lower() if application[14] else 'applied' }}">
+                        {{ application[14] or 'Applied' }}
+                    </div>
+                    <p style="margin-top: 1rem; opacity: 0.8;">
+                        Applied on {{ application[13].strftime('%d %B %Y at %I:%M %p') if application[13] else 'N/A' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <!-- Left Column - Student Information -->
+            <div>
+                <div class="info-section">
+                    <h3><i class="fas fa-user"></i> Student Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Name:</strong>
+                            <span>{{ application[2] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Email:</strong>
+                            <span>{{ application[3] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Phone:</strong>
+                            <span>{{ application[4] if application[4] else 'Not provided' }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Department:</strong>
+                            <span>{{ application[5] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>CGPA:</strong>
+                            <span class="cgpa-value cgpa-{% if application[6] >= 8.0 %}high{% elif application[6] >= 7.0 %}medium{% else %}low{% endif %}" style="font-weight: bold;">
+                                {{ application[6] }}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Graduation Year:</strong>
+                            <span>{{ application[7] }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resume Section -->
+                <div class="info-section">
+                    <h3><i class="fas fa-file-alt"></i> Resume</h3>
+                    {% if application[15] %}
+                        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                <i class="fas fa-file-pdf" style="color: #dc3545; font-size: 2rem;"></i>
+                                <div>
+                                    <h4 style="margin: 0; color: #333;">Resume Available</h4>
+                                    <p style="margin: 0; color: #666; font-size: 0.9rem;">Click to download the student's resume</p>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('view_resume', app_id=application[0]) }}" 
+                               class="btn btn-success" style="width: 100%;">
+                                <i class="fas fa-download"></i> Download Resume
+                            </a>
+                        </div>
+                    {% else %}
+                        <div style="background: #f8d7da; color: #721c24; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                            <h4 style="margin: 0;">No Resume Uploaded</h4>
+                            <p style="margin: 0.5rem 0 0 0;">The student has not uploaded a resume for this application.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Right Column - Job Information -->
+            <div>
+                <div class="info-section">
+                    <h3><i class="fas fa-briefcase"></i> Job Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Company:</strong>
+                            <span>{{ application[8] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Position:</strong>
+                            <span>{{ application[9] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Required CGPA:</strong>
+                            <span>{{ application[11] }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Student Meets Requirement:</strong>
+                            <span class="{% if application[6] >= application[11] %}text-success{% else %}text-danger{% endif %}" style="font-weight: bold;">
+                                {% if application[6] >= application[11] %}
+                                    <i class="fas fa-check-circle"></i> Yes
+                                {% else %}
+                                    <i class="fas fa-times-circle"></i> No
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Required Skills -->
+                {% if application[12] %}
+                <div class="info-section">
+                    <h3><i class="fas fa-tools"></i> Required Skills</h3>
+                    <div class="skills-container">
+                        {% for skill in application[12].split(',') %}
+                            <span class="skill-tag">{{ skill.strip() }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Job Description -->
+                <div class="info-section">
+                    <h3><i class="fas fa-file-alt"></i> Job Description</h3>
+                    <div class="job-description">
+                        {{ application[10] if application[10] else 'No detailed description available.' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cover Letter -->
+        {% if application[16] %}
+        <div class="info-section">
+            <h3><i class="fas fa-envelope"></i> Cover Letter</h3>
+            <div class="cover-letter">
+                {{ application[16] }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Admin Comments -->
+        <div class="info-section">
+            <h3><i class="fas fa-comment-alt"></i> Admin Comments</h3>
+            <div class="admin-comments">
+                {{ application[17] if application[17] else 'No admin comments yet.' }}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-section" style="background: #f8f9fa; padding: 2rem; border-radius: 10px; text-align: center;">
+            <h3 style="margin-bottom: 2rem;"><i class="fas fa-cogs"></i> Application Actions</h3>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                {% if application[14] == 'Applied' %}
+                    {% if application[15] %}
+                        <a href="{{ url_for('update_application_status', app_id=application[0], status='Shortlisted') }}" 
+                           class="btn btn-success" style="padding: 1rem 2rem;"
+                           onclick="return confirm('Have you reviewed the resume? Shortlist this application?')">
+                            <i class="fas fa-check"></i> Shortlist Application
+                        </a>
+                    {% else %}
+                        <span class="btn btn-secondary" style="padding: 1rem 2rem; cursor: not-allowed; opacity: 0.6;" 
+                              title="Cannot shortlist - No resume uploaded">
+                            <i class="fas fa-ban"></i> No Resume Available
+                        </span>
+                    {% endif %}
+                    <a href="{{ url_for('update_application_status', app_id=application[0], status='Rejected') }}" 
+                       class="btn btn-danger" style="padding: 1rem 2rem;"
+                       onclick="return confirm('Reject this application?')">
+                        <i class="fas fa-times"></i> Reject Application
+                    </a>
+                {% elif application[14] == 'Shortlisted' %}
+                    <a href="{{ url_for('update_application_status', app_id=application[0], status='Selected') }}" 
+                       class="btn btn-success" style="padding: 1rem 2rem;"
+                       onclick="return confirm('Select this candidate for the position?')">
+                        <i class="fas fa-star"></i> Select Candidate
+                    </a>
+                    <a href="{{ url_for('update_application_status', app_id=application[0], status='Rejected') }}" 
+                       class="btn btn-danger" style="padding: 1rem 2rem;"
+                       onclick="return confirm('Reject this application?')">
+                        <i class="fas fa-times"></i> Reject Application
+                    </a>
+                {% elif application[14] == 'Selected' %}
+                    <div style="color: #28a745; font-size: 1.2rem;">
+                        <i class="fas fa-trophy" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <h4>Candidate Selected!</h4>
+                        <p>This candidate has been successfully selected for the position.</p>
+                    </div>
+                {% elif application[14] == 'Rejected' %}
+                    <div style="color: #dc3545; font-size: 1.2rem;">
+                        <i class="fas fa-ban" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <h4>Application Rejected</h4>
+                        <p>This application has been rejected.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-section {
+    margin-bottom: 2rem;
+}
+
+.info-section h3 {
+    color: #333;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.info-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 5px;
+    border-left: 3px solid #667eea;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.skills-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.job-description, .cover-letter, .admin-comments {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 5px;
+    border: 1px solid #e9ecef;
+    line-height: 1.6;
+    min-height: 80px;
+}
+
+.status-badge-large {
+    padding: 1rem 1.5rem;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.status-applied { background: #cce5ff; color: #0066cc; }
+.status-shortlisted { background: #fff3cd; color: #856404; }
+.status-selected { background: #d4edda; color: #155724; }
+.status-rejected { background: #f8d7da; color: #721c24; }
+
+.application-header {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.action-section {
+    border: 2px solid #667eea;
+}
+
+.cgpa-high { color: #28a745; }
+.cgpa-medium { color: #ffc107; }
+.cgpa-low { color: #dc3545; }
+
+.text-success { color: #28a745; }
+.text-danger { color: #dc3545; }
+</style>
+{% endblock %}

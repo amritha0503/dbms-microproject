@@ -1,0 +1,51 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# VS Code temp files
+tempCodeRunnerFile.py
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database files (if any)
+*.db
+*.sqlite
+
+# Log files
+*.log
+
+# Backup files
+*.bak
+*_backup.*
+
+# Test files
+test_*.py
+*_test.py
+
+# Demo files
+*_DEMO.py
+
+# Migration files (one-time use)
+apply_migration.py
+create_*_table.py
+database_migration.sql
+check_*.py
+
+# Uploaded files (keep structure but ignore content)
+static/uploads/resumes/*
+!static/uploads/resumes/.gitkeep

@@ -17,6 +17,7 @@
                     <a href="{{ url_for('student_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                     <a href="{{ url_for('student_profile') }}"><i class="fas fa-user"></i> Profile</a>
                     <a href="{{ url_for('student_interviews') }}"><i class="fas fa-calendar-alt"></i> Interviews</a>
+                    <a href="{{ url_for('student_notifications') }}"><i class="fas fa-bell"></i> Notifications</a>
                 {% elif session.user_type == 'admin' %}
                     <a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                     <a href="{{ url_for('manage_students') }}"><i class="fas fa-users"></i> Students</a>

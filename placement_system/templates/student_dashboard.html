@@ -27,7 +27,7 @@
     </div>
     <div class="stat-card">
         <div class="stat-number">
-            {% if student_profile %}{{ student_profile[4] }}{% else %}N/A{% endif %}
+            {% if student_profile %}{{ student_profile[5] }}{% else %}N/A{% endif %}
         </div>
         <div class="stat-label">Current CGPA</div>
     </div>
@@ -56,8 +56,8 @@
                         <td>₹{{ "{:,.0f}".format(app[3]) if app[3] else 'Not disclosed' }}</td>
                         <td>{{ app[4].strftime('%d %b %Y') if app[4] else 'N/A' }}</td>
                         <td>
-                            <span class="status-badge status-{{ app[5].lower() if app[5] else 'applied' }}">
-                                {{ app[5] or 'Applied' }}
+                            <span class="status-badge status-{{ app[6].lower().replace(' ', '-').replace('-', '_') if app[6] else 'applied' }}">
+                                {{ app[6] or 'Applied' }}
                             </span>
                         </td>
                     </tr>
@@ -109,17 +109,9 @@
                             <i class="fas fa-check"></i> Already Applied
                         </span>
                     {% else %}
-                        {% if student_profile and student_profile[4] >= job[5] %}
-                            <a href="{{ url_for('apply_for_job', job_id=job[0]) }}" 
-                               class="btn btn-success btn-sm"
-                               onclick="return confirm('Are you sure you want to apply for this job?')">
-                                <i class="fas fa-paper-plane"></i> Apply Now
-                            </a>
-                        {% else %}
-                            <span class="btn btn-warning btn-sm" style="cursor: not-allowed; opacity: 0.6;">
-                                <i class="fas fa-exclamation-triangle"></i> CGPA Requirement Not Met
-                            </span>
-                        {% endif %}
+                        <a href="{{ url_for('job_details', job_id=job[0]) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> View Details & Apply
+                        </a>
                     {% endif %}
                 </div>
             </div>

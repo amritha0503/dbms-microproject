@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}My Notifications{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <h2>📢 My Notifications</h2>
+    
+    {% if notifications %}
+        <div class="notifications-list">
+            {% for notification in notifications %}
+            <div class="notification-item {{ 'notification-new' if not notification[3] else 'notification-read' }}">
+                <div class="notification-header">
+                    <span class="notification-type">
+                        {% if notification[2] == 'Round Update' %}
+                            📋 Round Update
+                        {% elif notification[2] == 'Interview Scheduled' %}
+                            📅 Interview Scheduled
+                        {% else %}
+                            📢 {{ notification[2] }}
+                        {% endif %}
+                    </span>
+                    <span class="notification-date">{{ notification[4].strftime('%Y-%m-%d %H:%M') if notification[4] else '' }}</span>
+                </div>
+                <div class="notification-message">
+                    {{ notification[1] }}
+                </div>
+                {% if not notification[3] %}
+                <div class="notification-new-badge">NEW</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-notifications">
+            <div class="empty-state">
+                <h3>📭 No Notifications</h3>
+                <p>You don't have any notifications yet. Check back later for updates on your applications and interview schedules.</p>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="actions">
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-primary">🏠 Back to Dashboard</a>
+    </div>
+</div>
+
+<style>
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.notification-item {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 4px solid #007bff;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.notification-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.notification-new {
+    border-left-color: #28a745;
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.notification-read {
+    border-left-color: #6c757d;
+    opacity: 0.8;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.notification-type {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.notification-new .notification-type {
+    color: #28a745;
+}
+
+.notification-date {
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+.notification-message {
+    line-height: 1.6;
+    color: #333;
+}
+
+.notification-new-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.no-notifications {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state h3 {
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #6c757d;
+    font-size: 1.1em;
+}
+
+.actions {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .notification-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .notification-new-badge {
+        position: static;
+        align-self: flex-end;
+        margin-top: 10px;
+    }
+}
+
+/* Animation for new notifications */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.notification-new {
+    animation: slideIn 0.5s ease-out;
+}
+</style>
+{% endblock %}

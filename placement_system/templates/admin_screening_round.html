@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Update Screening Round{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <h2>Update {{ round_name }} Result</h2>
+    
+    {% if application %}
+    <div class="application-info">
+        <h3>Application Details</h3>
+        <div class="info-grid">
+            <div><strong>Student:</strong> {{ application[1] }}</div>
+            <div><strong>Email:</strong> {{ application[2] }}</div>
+            <div><strong>Job:</strong> {{ application[5] }} at {{ application[4] }}</div>
+            <div><strong>CGPA:</strong> {{ application[3] }}</div>
+            <div><strong>Current Round:</strong> {{ application[8] or 'Applied' }}</div>
+            <div><strong>Overall Status:</strong> {{ application[13] or 'Active' }}</div>
+        </div>
+    </div>
+    
+    <div class="screening-form">
+        <h3>{{ round_name }} Evaluation</h3>
+        <form method="POST">
+            <input type="hidden" name="round_name" value="{{ 'Round 1' if round_name == 'Round1' else 'Round 2' if round_name == 'Round2' else round_name }}">
+            
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="result">Result:</label>
+                    <select name="result" id="result" class="form-control" required onchange="toggleNextRound()">
+                        <option value="">Select Result</option>
+                        <option value="Pass">✅ Pass - Advance to Next Round</option>
+                        <option value="Fail">❌ Fail - Reject Application</option>
+                    </select>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="feedback">Feedback/Reason:</label>
+                    <textarea name="feedback" id="feedback" class="form-control" rows="4" 
+                              placeholder="Provide feedback for the student..." required></textarea>
+                </div>
+                
+                <div class="form-group full-width" id="next-round-section" style="display: none;">
+                    <label for="next_round_description">Next Round Description:</label>
+                    <textarea name="next_round_description" id="next_round_description" class="form-control" rows="3" 
+                              placeholder="Describe what to expect in the next round..."></textarea>
+                    <small class="text-muted">This will be included in the student notification</small>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">📝 Update {{ round_name }} Result</button>
+                <a href="{{ url_for('manage_applications') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Round Information -->
+    <div class="round-info">
+        <h3>Round Information</h3>
+        {% if round_name == 'Round 1' %}
+        <div class="info-card">
+            <h4>📋 Round 1 - Initial Screening</h4>
+            <p><strong>Purpose:</strong> Basic eligibility and profile screening</p>
+            <p><strong>Criteria:</strong> Academic performance, basic requirements, resume quality</p>
+            <p><strong>Next Step:</strong> If passed, student proceeds to Round 2</p>
+        </div>
+        {% elif round_name == 'Round 2' %}
+        <div class="info-card">
+            <h4>📋 Round 2 - Advanced Screening</h4>
+            <p><strong>Purpose:</strong> Detailed profile evaluation and skill assessment</p>
+            <p><strong>Criteria:</strong> Technical skills, projects, experience alignment</p>
+            <p><strong>Next Step:</strong> If passed, student proceeds to Technical Interview</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% else %}
+    <div class="alert alert-danger">
+        Application not found.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.application-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.screening-form {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-control {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.form-control textarea {
+    resize: vertical;
+}
+
+.form-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.round-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.info-card h4 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.text-muted {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+@media (max-width: 768px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function toggleNextRound() {
+    const result = document.getElementById('result').value;
+    const nextRoundSection = document.getElementById('next-round-section');
+    const nextRoundDesc = document.getElementById('next_round_description');
+    
+    if (result === 'Pass') {
+        nextRoundSection.style.display = 'block';
+        nextRoundDesc.required = true;
+        
+        // Set default description based on current round
+        const roundName = '{{ round_name }}';
+        if (roundName === 'Round 1') {
+            nextRoundDesc.placeholder = 'Round 2 will involve detailed profile evaluation and skill assessment. Please prepare your portfolio and be ready to discuss your projects.';
+        } else if (roundName === 'Round 2') {
+            nextRoundDesc.placeholder = 'Technical Interview will be scheduled soon. Please prepare for coding questions and technical discussions related to the job role.';
+        }
+    } else {
+        nextRoundSection.style.display = 'none';
+        nextRoundDesc.required = false;
+    }
+}
+
+// Set focus on result dropdown when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('result').focus();
+});
+</script>
+{% endblock %}

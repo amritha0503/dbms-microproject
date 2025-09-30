@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Update Student - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-user-edit"></i> Update Student</h2>
+    
+    <form method="POST">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="name">Full Name*</label>
+                <input type="text" name="name" id="name" class="form-control" 
+                       value="{{ student[1] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email*</label>
+                <input type="email" name="email" id="email" class="form-control" 
+                       value="{{ student[2] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="department">Department*</label>
+                <select name="department" id="department" class="form-control" required>
+                    <option value="Computer Science" {{ 'selected' if student[4] == 'Computer Science' else '' }}>Computer Science</option>
+                    <option value="Information Technology" {{ 'selected' if student[4] == 'Information Technology' else '' }}>Information Technology</option>
+                    <option value="Electronics" {{ 'selected' if student[4] == 'Electronics' else '' }}>Electronics</option>
+                    <option value="Mechanical" {{ 'selected' if student[4] == 'Mechanical' else '' }}>Mechanical</option>
+                    <option value="Civil" {{ 'selected' if student[4] == 'Civil' else '' }}>Civil</option>
+                    <option value="Electrical" {{ 'selected' if student[4] == 'Electrical' else '' }}>Electrical</option>
+                    <option value="Chemical" {{ 'selected' if student[4] == 'Chemical' else '' }}>Chemical</option>
+                    <option value="Other" {{ 'selected' if student[4] == 'Other' else '' }}>Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cgpa">CGPA*</label>
+                <input type="number" name="cgpa" id="cgpa" class="form-control" 
+                       min="0" max="10" step="0.01" value="{{ student[5] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="graduation_year">Graduation Year*</label>
+                <input type="number" name="graduation_year" id="graduation_year" class="form-control" 
+                       min="2020" max="2030" value="{{ student[6] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" name="phone" id="phone" class="form-control" 
+                       value="{{ student[7] if student[7] else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="status">Status</label>
+                <select name="status" id="status" class="form-control">
+                    <option value="Active" {{ 'selected' if student[10] == 'Active' else '' }}>Active</option>
+                    <option value="Placed" {{ 'selected' if student[10] == 'Placed' else '' }}>Placed</option>
+                    <option value="Graduated" {{ 'selected' if student[10] == 'Graduated' else '' }}>Graduated</option>
+                    <option value="Inactive" {{ 'selected' if student[10] == 'Inactive' else '' }}>Inactive</option>
+                </select>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Update Student
+            </button>
+            <a href="{{ url_for('manage_students') }}" class="btn" style="background: #6c757d; color: white;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Schedule Interview{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <h2>Schedule Interview</h2>
+    
+    {% if application %}
+    <div class="application-info">
+        <h3>Application Details</h3>
+        <div class="info-grid">
+            <div><strong>Student:</strong> {{ application[1] }}</div>
+            <div><strong>Job:</strong> {{ application[5] }} at {{ application[4] }}</div>
+            <div><strong>Current Round:</strong> {{ application[8] or 'Applied' }}</div>
+            <div><strong>Overall Status:</strong> {{ application[13] or 'Active' }}</div>
+        </div>
+    </div>
+    
+    <div class="interview-form">
+        <h3>Schedule {{ round_name or 'Interview' }}</h3>
+        <form method="POST">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="round_name">Interview Round:</label>
+                    <select name="round_name" id="round_name" class="form-control" required>
+                        <option value="Technical Interview" {% if round_name == 'Technical' %}selected{% endif %}>Technical Interview</option>
+                        <option value="HR Interview" {% if round_name == 'HR' %}selected{% endif %}>HR Interview</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="scheduled_date">Interview Date:</label>
+                    <input type="date" name="scheduled_date" id="scheduled_date" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="scheduled_time">Interview Time:</label>
+                    <input type="time" name="scheduled_time" id="scheduled_time" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location/Link:</label>
+                    <input type="text" name="location" id="location" class="form-control" 
+                           placeholder="Room 201 or https://meet.google.com/..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="interview_type">Interview Type:</label>
+                    <select name="interview_type" id="interview_type" class="form-control" required>
+                        <option value="In-Person">In-Person</option>
+                        <option value="Video Call">Video Call</option>
+                        <option value="Phone Call">Phone Call</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="interviewer_name">Interviewer Name:</label>
+                    <input type="text" name="interviewer_name" id="interviewer_name" class="form-control" 
+                           placeholder="Enter interviewer name" required>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">📅 Schedule Interview</button>
+                <a href="{{ url_for('manage_applications') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Existing Interview Rounds -->
+    {% if existing_rounds %}
+    <div class="existing-rounds">
+        <h3>Existing Interview Rounds</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Round</th>
+                    <th>Date & Time</th>
+                    <th>Location</th>
+                    <th>Type</th>
+                    <th>Interviewer</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for round in existing_rounds %}
+                <tr>
+                    <td>{{ round[2] }}</td>
+                    <td>{{ round[3] }} {{ round[4] }}</td>
+                    <td>{{ round[5] }}</td>
+                    <td>{{ round[6] }}</td>
+                    <td>{{ round[9] }}</td>
+                    <td>
+                        {% if round[7] == 'Completed' %}
+                            <span class="badge badge-success">{{ round[7] }}</span>
+                        {% elif round[7] == 'Scheduled' %}
+                            <span class="badge badge-primary">{{ round[7] }}</span>
+                        {% else %}
+                            <span class="badge badge-warning">{{ round[7] }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('update_interview_status', round_id=round[0], status='Completed') }}" 
+                           class="btn btn-sm btn-success">✅ Complete</a>
+                        <a href="{{ url_for('update_interview_status', round_id=round[0], status='Cancelled') }}" 
+                           class="btn btn-sm btn-danger">❌ Cancel</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="alert alert-danger">
+        Application not found.
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.application-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.interview-form {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-control {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.form-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.existing-rounds {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+// Set minimum date to today
+document.getElementById('scheduled_date').min = new Date().toISOString().split('T')[0];
+</script>
+{% endblock %}

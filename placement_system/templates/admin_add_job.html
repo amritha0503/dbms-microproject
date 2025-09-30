@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Add Job - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-plus"></i> Add New Job</h2>
+    
+    <form method="POST">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="company_id">Company*</label>
+                <select name="company_id" id="company_id" class="form-control" required>
+                    <option value="">Select Company</option>
+                    {% for company in companies %}
+                    <option value="{{ company[0] }}">{{ company[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="job_title">Job Title*</label>
+                <input type="text" name="job_title" id="job_title" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="salary_package">Salary Package (₹)</label>
+                <input type="number" name="salary_package" id="salary_package" class="form-control" 
+                       min="0" step="1000" placeholder="e.g., 600000">
+            </div>
+            <div class="form-group">
+                <label for="location">Location*</label>
+                <input type="text" name="location" id="location" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="min_cgpa">Minimum CGPA*</label>
+                <input type="number" name="min_cgpa" id="min_cgpa" class="form-control" 
+                       min="0" max="10" step="0.1" value="6.0" required>
+            </div>
+            <div class="form-group">
+                <label for="job_type">Job Type*</label>
+                <select name="job_type" id="job_type" class="form-control" required>
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Internship">Internship</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="application_deadline">Application Deadline*</label>
+                <input type="date" name="application_deadline" id="application_deadline" 
+                       class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="required_skills">Required Skills</label>
+                <input type="text" name="required_skills" id="required_skills" class="form-control" 
+                       placeholder="e.g., Python, JavaScript, React, SQL">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="job_description">Job Description*</label>
+                <textarea name="job_description" id="job_description" class="form-control" 
+                          rows="4" required placeholder="Describe the job role, responsibilities, and requirements..."></textarea>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add Job
+            </button>
+            <a href="{{ url_for('manage_jobs') }}" class="btn" style="background: #6c757d; color: white;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+</style>
+
+<script>
+// Set minimum date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('application_deadline').min = today;
+});
+</script>
+{% endblock %}

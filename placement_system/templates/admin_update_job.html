@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Update Job - Placement System{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-briefcase-edit"></i> Update Job</h2>
+    
+    <form method="POST">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+                <label for="company_id">Company*</label>
+                <select name="company_id" id="company_id" class="form-control" required>
+                    {% for company in companies %}
+                    <option value="{{ company[0] }}" {{ 'selected' if company[0] == job[1] else '' }}>
+                        {{ company[1] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="job_title">Job Title*</label>
+                <input type="text" name="job_title" id="job_title" class="form-control" 
+                       value="{{ job[2] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="salary_package">Salary Package (₹)</label>
+                <input type="number" name="salary_package" id="salary_package" class="form-control" 
+                       min="0" step="1000" value="{{ job[3] if job[3] else '' }}" placeholder="e.g., 600000">
+            </div>
+            <div class="form-group">
+                <label for="location">Location*</label>
+                <input type="text" name="location" id="location" class="form-control" 
+                       value="{{ job[4] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="min_cgpa">Minimum CGPA*</label>
+                <input type="number" name="min_cgpa" id="min_cgpa" class="form-control" 
+                       min="0" max="10" step="0.1" value="{{ job[5] }}" required>
+            </div>
+            <div class="form-group">
+                <label for="job_type">Job Type*</label>
+                <select name="job_type" id="job_type" class="form-control" required>
+                    <option value="Full-time" {{ 'selected' if job[6] == 'Full-time' else '' }}>Full-time</option>
+                    <option value="Part-time" {{ 'selected' if job[6] == 'Part-time' else '' }}>Part-time</option>
+                    <option value="Internship" {{ 'selected' if job[6] == 'Internship' else '' }}>Internship</option>
+                </select>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="requirements">Requirements</label>
+                <textarea name="requirements" id="requirements" class="form-control" 
+                          rows="3" placeholder="List the skills and qualifications required">{{ job[7] if job[7] else '' }}</textarea>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="description">Job Description</label>
+                <textarea name="description" id="description" class="form-control" 
+                          rows="4" placeholder="Detailed job description">{{ job[8] if job[8] else '' }}</textarea>
+            </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Update Job
+            </button>
+            <a href="{{ url_for('manage_jobs') }}" class="btn" style="background: #6c757d; color: white;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+</style>
+{% endblock %}

@@ -75,15 +75,40 @@ CREATE TABLE Application (
     student_id INT NOT NULL,
     job_id INT NOT NULL,
     application_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('Applied', 'Shortlisted', 'Selected', 'Rejected') DEFAULT 'Applied',
+    current_round ENUM('Applied', 'Round 1', 'Round 2', 'Technical Interview', 'HR Interview', 'Selected', 'Rejected') DEFAULT 'Applied',
+    overall_status ENUM('In Progress', 'Selected', 'Rejected') DEFAULT 'In Progress',
     admin_comments TEXT,
+    resume_path VARCHAR(255),
+    cover_letter TEXT,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
     FOREIGN KEY (job_id) REFERENCES Job(job_id) ON DELETE CASCADE,
     UNIQUE KEY unique_application (student_id, job_id)
 );
 
--- 6. Interview Table
+-- 6. Interview Rounds Table (New enhanced structure)
+CREATE TABLE Interview_Rounds (
+    round_id INT AUTO_INCREMENT PRIMARY KEY,
+    application_id INT NOT NULL,
+    round_name ENUM('Round 1', 'Round 2', 'Technical Interview', 'HR Interview') NOT NULL,
+    scheduled_date DATETIME,
+    scheduled_time TIME,
+    location VARCHAR(200),
+    interview_mode ENUM('Online', 'Offline', 'Hybrid') DEFAULT 'Offline',
+    interviewer_name VARCHAR(100),
+    interviewer_email VARCHAR(100),
+    round_status ENUM('Scheduled', 'Completed', 'Cancelled', 'Rescheduled') DEFAULT 'Scheduled',
+    result ENUM('Pending', 'Passed', 'Failed', 'On Hold') DEFAULT 'Pending',
+    feedback TEXT,
+    score DECIMAL(5,2),
+    max_score DECIMAL(5,2) DEFAULT 100.00,
+    admin_notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (application_id) REFERENCES Application(application_id) ON DELETE CASCADE
+);
+
+-- 7. Interview Table (Keeping for backward compatibility, but Interview_Rounds is preferred)
 CREATE TABLE Interview (
     interview_id INT AUTO_INCREMENT PRIMARY KEY,
     application_id INT NOT NULL,
@@ -127,16 +152,22 @@ INSERT INTO Job (company_id, job_title, job_description, salary_package, locatio
 (4, 'Cloud Engineer', 'Manage cloud infrastructure', 700000.00, 'Pune', 8.0, 'AWS, Docker, Kubernetes', '2024-12-30');
 
 -- Applications
-INSERT INTO Application (student_id, job_id, status) VALUES
-(1, 1, 'Applied'),
-(1, 2, 'Shortlisted'),
-(2, 1, 'Applied'),
-(2, 3, 'Selected'),
-(3, 4, 'Applied'),
-(3, 5, 'Shortlisted'),
-(4, 2, 'Rejected'),
-(5, 1, 'Applied'),
-(5, 5, 'Shortlisted');
+INSERT INTO Application (student_id, job_id, current_round, overall_status) VALUES
+(1, 1, 'Applied', 'In Progress'),
+(1, 2, 'Round 1', 'In Progress'),
+(2, 1, 'Applied', 'In Progress'),
+(2, 3, 'Selected', 'Selected'),
+(3, 4, 'Applied', 'In Progress'),
+(3, 5, 'Technical Interview', 'In Progress'),
+(4, 2, 'Rejected', 'Rejected'),
+(5, 1, 'Applied', 'In Progress'),
+(5, 5, 'Round 2', 'In Progress');
+
+-- Interview Rounds
+INSERT INTO Interview_Rounds (application_id, round_name, scheduled_date, scheduled_time, location, interview_mode, interviewer_name, interviewer_email, round_status, result, feedback, score, admin_notes) VALUES
+(2, 'Round 1', '2025-10-05', '10:00:00', 'Conference Room A', 'Offline', 'John Doe', 'john.doe@techcorp.com', 'Completed', 'Passed', 'Good technical knowledge', 85.00, 'Proceed to next round'),
+(6, 'Technical Interview', '2025-10-08', '14:00:00', 'Online Meeting', 'Online', 'Sarah Wilson', 'sarah.wilson@cloudtech.com', 'Scheduled', 'Pending', NULL, NULL, 'Technical round for cloud engineer position'),
+(9, 'Round 2', '2025-10-10', '11:00:00', 'Conference Room B', 'Offline', 'Mike Johnson', 'mike.johnson@cloudtech.com', 'Scheduled', 'Pending', NULL, NULL, 'Second round assessment');
 
 -- Interviews
 INSERT INTO Interview (application_id, interview_date, interview_type, location, interviewer_name, result) VALUES

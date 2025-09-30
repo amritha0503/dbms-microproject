@@ -1,296 +1,91 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
-{% block title %}Manage Applications - Placement System{% endblock %}
+{% block title %}Manage Applications{% endblock %}
 
 {% block content %}
-<div class="card">
-    <h2><i class="fas fa-file-alt"></i> Manage Applications</h2>
+<div class="content-card">
+    <h2>Manage Applications & Interview Scheduling</h2>
     
     {% if applications %}
-        <!-- Application Statistics -->
-        <div class="stats-grid" style="margin-bottom: 2rem;">
-            <div class="stat-card">
-                <div class="stat-number">{{ applications|selectattr('7', 'equalto', 'Applied')|list|length }}</div>
-                <div class="stat-label">New Applications</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ applications|selectattr('7', 'equalto', 'Shortlisted')|list|length }}</div>
-                <div class="stat-label">Shortlisted</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ applications|selectattr('7', 'equalto', 'Selected')|list|length }}</div>
-                <div class="stat-label">Selected</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">{{ applications|selectattr('7', 'equalto', 'Rejected')|list|length }}</div>
-                <div class="stat-label">Rejected</div>
-            </div>
-        </div>
-
-        <!-- Filter Options -->
-        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-            <h4 style="margin-bottom: 1rem; color: #555;">
-                <i class="fas fa-filter"></i> Filter Applications
-            </h4>
-            <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
-                <button onclick="filterApplications('all')" class="btn btn-sm btn-primary filter-btn active">
-                    All ({{ applications|length }})
-                </button>
-                <button onclick="filterApplications('Applied')" class="btn btn-sm filter-btn">
-                    Applied ({{ applications|selectattr('7', 'equalto', 'Applied')|list|length }})
-                </button>
-                <button onclick="filterApplications('Shortlisted')" class="btn btn-sm filter-btn">
-                    Shortlisted ({{ applications|selectattr('7', 'equalto', 'Shortlisted')|list|length }})
-                </button>
-                <button onclick="filterApplications('Selected')" class="btn btn-sm filter-btn">
-                    Selected ({{ applications|selectattr('7', 'equalto', 'Selected')|list|length }})
-                </button>
-                <button onclick="filterApplications('Rejected')" class="btn btn-sm filter-btn">
-                    Rejected ({{ applications|selectattr('7', 'equalto', 'Rejected')|list|length }})
-                </button>
-            </div>
-        </div>
-
-        <!-- Applications Table -->
-        <div class="table-container">
-            <table id="applicationsTable">
-                <thead>
-                    <tr>
-                        <th>App ID</th>
-                        <th>Student Details</th>
-                        <th>Company & Job</th>
-                        <th>Applied Date</th>
-                        <th>Status</th>
-                        <th>Quick Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for app in applications %}
-                    <tr class="application-row" data-status="{{ app[7] }}">
-                        <td>#{{ app[0] }}</td>
-                        <td>
-                            <div>
-                                <strong>{{ app[1] }}</strong><br>
-                                <small style="color: #666;">{{ app[2] }}</small><br>
-                                {% if app[3] >= 8.0 %}
-                                <span style="font-weight: bold; color: #28a745;">
-                                    CGPA: {{ app[3] }}
-                                </span>
-                                {% elif app[3] >= 7.0 %}
-                                <span style="font-weight: bold; color: #ffc107;">
-                                    CGPA: {{ app[3] }}
-                                </span>
-                                {% else %}
-                                <span style="font-weight: bold; color: #dc3545;">
-                                    CGPA: {{ app[3] }}
-                                </span>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                <strong style="color: #667eea;">{{ app[4] }}</strong><br>
-                                <span>{{ app[5] }}</span>
-                            </div>
-                        </td>
-                        <td>{{ app[6].strftime('%d %b %Y') if app[6] else 'N/A' }}</td>
-                        <td>
-                            <span class="status-badge status-{{ app[7].lower() if app[7] else 'applied' }}">
-                                {{ app[7] or 'Applied' }}
-                            </span>
-                        </td>
-                        <td>
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                {% if app[7] == 'Applied' %}
-                                    <a href="{{ url_for('update_application_status', app_id=app[0], status='Shortlisted') }}" 
-                                       class="btn btn-success btn-sm" title="Shortlist"
-                                       onclick="return confirm('Shortlist this application?')">
-                                        <i class="fas fa-check"></i>
-                                    </a>
-                                    <a href="{{ url_for('update_application_status', app_id=app[0], status='Rejected') }}" 
-                                       class="btn btn-danger btn-sm" title="Reject"
-                                       onclick="return confirm('Reject this application?')">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                {% elif app[7] == 'Shortlisted' %}
-                                    <a href="{{ url_for('update_application_status', app_id=app[0], status='Selected') }}" 
-                                       class="btn btn-success btn-sm" title="Select"
-                                       onclick="return confirm('Select this candidate?')">
-                                        <i class="fas fa-star"></i>
-                                    </a>
-                                    <a href="{{ url_for('update_application_status', app_id=app[0], status='Rejected') }}" 
-                                       class="btn btn-danger btn-sm" title="Reject"
-                                       onclick="return confirm('Reject this application?')">
-                                        <i class="fas fa-times"></i>
-                                    </a>
-                                    <button class="btn btn-info btn-sm" title="Schedule Interview" 
-                                            data-app-id="{{ app[0] }}" 
-                                            data-student-name="{{ app[1] }}" 
-                                            data-company="{{ app[4] }}" 
-                                            data-job-title="{{ app[5] }}"
-                                            onclick="scheduleInterview(this)">
-                                        <i class="fas fa-calendar-plus"></i>
-                                    </button>
-                                {% elif app[7] == 'Selected' %}
-                                    <span class="btn btn-success btn-sm" style="opacity: 0.6; cursor: not-allowed;">
-                                        <i class="fas fa-check-circle"></i> Hired
-                                    </span>
-                                {% elif app[7] == 'Rejected' %}
-                                    <a href="{{ url_for('update_application_status', app_id=app[0], status='Applied') }}" 
-                                       class="btn btn-warning btn-sm" title="Reconsider"
-                                       onclick="return confirm('Move this application back to Applied status?')">
-                                        <i class="fas fa-undo"></i>
-                                    </a>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Bulk Actions -->
-        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
-            <h4 style="margin-bottom: 1rem; color: #555;">
-                <i class="fas fa-tasks"></i> Bulk Actions
-            </h4>
-            <p style="color: #666; margin-bottom: 1rem;">
-                Select multiple applications and perform bulk operations (Feature coming soon)
-            </p>
-            <div style="display: flex; gap: 1rem; opacity: 0.6;">
-                <button class="btn btn-success btn-sm" disabled>
-                    <i class="fas fa-check"></i> Bulk Shortlist
-                </button>
-                <button class="btn btn-danger btn-sm" disabled>
-                    <i class="fas fa-times"></i> Bulk Reject
-                </button>
-                <button class="btn btn-info btn-sm" disabled>
-                    <i class="fas fa-download"></i> Export to Excel
-                </button>
-            </div>
-        </div>
-
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Job</th>
+                    <th>Current Round</th>
+                    <th>Overall Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app[1] }}</td>
+                    <td>{{ app[5] }}</td>
+                    <td>
+                        <span class="badge badge-info">{{ app[8] or 'Applied' }}</span>
+                    </td>
+                    <td>
+                        {% if app[13] == 'Selected' %}
+                            <span class="badge badge-success">{{ app[13] }}</span>
+                        {% elif app[13] == 'Rejected' %}
+                            <span class="badge badge-danger">{{ app[13] }}</span>
+                        {% else %}
+                            <span class="badge badge-primary">{{ app[13] or 'Active' }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ app[6] }}</td>
+                    <td>
+                        <!-- Resume Download -->
+                        {% if app[9] and app[9].strip() %}
+                        {% set filename = app[9].split('/')[-1].split('\\')[-1] %}
+                        <a href="{{ url_for('download_resume', filename=filename) }}" class="btn btn-sm btn-info" title="Download Resume">📄 Resume</a>
+                        {% else %}
+                        <span class="text-muted">No Resume</span>
+                        {% endif %}
+                        
+                        <!-- Screening Rounds (Round 1 & 2) - Pass/Fail Updates -->
+                        {% if app[13] not in ['Selected', 'Rejected'] %}
+                        <div class="btn-group-vertical" style="margin-top: 5px;">
+                            <a href="{{ url_for('update_screening_round', app_id=app[0]) }}?round=Round1" class="btn btn-sm btn-info">� Round 1 Result</a>
+                            <a href="{{ url_for('update_screening_round', app_id=app[0]) }}?round=Round2" class="btn btn-sm btn-info">� Round 2 Result</a>
+                        </div>
+                        
+                        <!-- Interview Scheduling (Technical & HR) -->
+                        <div class="btn-group-vertical" style="margin-top: 5px;">
+                            <a href="{{ url_for('schedule_interview', app_id=app[0]) }}?round=Technical" class="btn btn-sm btn-warning">� Technical Interview</a>
+                            <a href="{{ url_for('schedule_interview', app_id=app[0]) }}?round=HR" class="btn btn-sm btn-success">� HR Interview</a>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Status Update Buttons -->
+                        <div class="btn-group-vertical" style="margin-top: 5px;">
+                            <a href="{{ url_for('update_application_status', app_id=app[0], status='Shortlisted') }}" class="btn btn-sm btn-warning">✓ Shortlist</a>
+                            <a href="{{ url_for('update_application_status', app_id=app[0], status='Selected') }}" class="btn btn-sm btn-success">✅ Select</a>
+                            <a href="{{ url_for('update_application_status', app_id=app[0], status='Rejected') }}" class="btn btn-sm btn-danger">❌ Reject</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
-        <div style="text-align: center; color: #666; padding: 3rem;">
-            <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 1rem; color: #ddd;"></i>
-            <h3>No Applications Received</h3>
-            <p>Applications will appear here as students apply for jobs.</p>
-            <a href="{{ url_for('manage_jobs') }}" class="btn btn-primary" style="margin-top: 1rem;">
-                <i class="fas fa-briefcase"></i> Post New Jobs
-            </a>
-        </div>
+        <p>No applications found.</p>
     {% endif %}
 </div>
 
-<div style="text-align: center; margin-top: 1rem;">
-    <a href="{{ url_for('admin_dashboard') }}" class="btn" style="color: #667eea;">
-        <i class="fas fa-arrow-left"></i> Back to Dashboard
-    </a>
-</div>
-
-<!-- Interview Scheduling Modal -->
-<div id="interviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div style="background: white; padding: 2rem; border-radius: 10px; max-width: 500px; width: 90%;">
-        <h3 style="margin-bottom: 1rem; color: #555;">
-            <i class="fas fa-calendar-plus"></i> Schedule Interview
-        </h3>
-        <div id="interviewDetails" style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;"></div>
-        <form>
-            <div class="form-group">
-                <label>Interview Date & Time:</label>
-                <input type="datetime-local" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Interview Type:</label>
-                <select class="form-control" required>
-                    <option value="Technical">Technical</option>
-                    <option value="HR">HR</option>
-                    <option value="Group Discussion">Group Discussion</option>
-                    <option value="Final">Final</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Location:</label>
-                <input type="text" class="form-control" placeholder="Office address or 'Online'">
-            </div>
-            <div class="form-group">
-                <label>Interviewer Name:</label>
-                <input type="text" class="form-control">
-            </div>
-            <div style="text-align: center; margin-top: 1.5rem;">
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Schedule Interview
-                </button>
-                <button type="button" class="btn" onclick="closeInterviewModal()" style="margin-left: 1rem;">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<script>
-function filterApplications(status) {
-    const rows = document.querySelectorAll('.application-row');
-    const buttons = document.querySelectorAll('.filter-btn');
-    
-    // Update button states
-    buttons.forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    // Filter rows
-    rows.forEach(row => {
-        if (status === 'all' || row.dataset.status === status) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
-function scheduleInterview(button) {
-    const appId = button.dataset.appId;
-    const studentName = button.dataset.studentName;
-    const company = button.dataset.company;
-    const jobTitle = button.dataset.jobTitle;
-    
-    document.getElementById('interviewDetails').innerHTML = `
-        <strong>Student:</strong> ${studentName}<br>
-        <strong>Position:</strong> ${jobTitle} at ${company}<br>
-        <strong>Application ID:</strong> #${appId}
-    `;
-    document.getElementById('interviewModal').style.display = 'flex';
-}
-
-function closeInterviewModal() {
-    document.getElementById('interviewModal').style.display = 'none';
-}
-
-// Close modal when clicking outside
-document.getElementById('interviewModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeInterviewModal();
-    }
-});
-</script>
-
 <style>
-.filter-btn {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    color: #495057;
-}
-
-.filter-btn.active {
-    background-color: #667eea;
-    border-color: #667eea;
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
     color: white;
 }
-
-.filter-btn:hover:not(.active) {
-    background-color: #e2e6ea;
-    border-color: #dae0e5;
-}
+.badge-info { background-color: #17a2b8; }
+.badge-success { background-color: #28a745; }
+.badge-danger { background-color: #dc3545; }
+.badge-primary { background-color: #007bff; }
+.btn-group-vertical { display: flex; flex-direction: column; gap: 2px; }
 </style>
 {% endblock %}

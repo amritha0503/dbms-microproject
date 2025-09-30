@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - Placement System{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <h2><i class="fas fa-user-cog"></i> Administrator Portal</h2>
+        
+        <!-- Login/Register Toggle -->
+        <div style="display: flex; margin-bottom: 2rem; border-radius: 5px; overflow: hidden; background: #f8f9fa;">
+            <button type="button" onclick="showLogin()" id="loginTab" class="tab-btn active" style="flex: 1; padding: 1rem; border: none; background: #17a2b8; color: white; cursor: pointer;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button type="button" onclick="showRegister()" id="registerTab" class="tab-btn" style="flex: 1; padding: 1rem; border: none; background: #f8f9fa; color: #666; cursor: pointer;">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <form method="POST" action="{{ url_for('admin_login') }}">
+                <input type="hidden" name="action" value="login">
+                
+                <div class="form-group">
+                    <label for="login_username"><i class="fas fa-user"></i> Username:</label>
+                    <input type="text" name="username" id="login_username" 
+                           class="form-control" placeholder="Enter your username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login_password"><i class="fas fa-lock"></i> Password:</label>
+                    <input type="password" name="password" id="login_password" 
+                           class="form-control" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-info" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Login as Administrator
+                </button>
+            </form>
+
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                <div style="background: #f0f8ff; padding: 1rem; border-radius: 5px; font-size: 0.9rem;">
+                    <strong>Demo Admin Login:</strong><br>
+                    Username: admin<br>
+                    Password: admin123
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" style="display: none;">
+            <form method="POST" action="{{ url_for('admin_login') }}">
+                <input type="hidden" name="action" value="register">
+                
+                <div class="form-group">
+                    <label for="reg_fullname"><i class="fas fa-user"></i> Full Name:</label>
+                    <input type="text" name="full_name" id="reg_fullname" 
+                           class="form-control" placeholder="Enter your full name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_username"><i class="fas fa-user-tag"></i> Username:</label>
+                    <input type="text" name="username" id="reg_username" 
+                           class="form-control" placeholder="Choose a username" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_email"><i class="fas fa-envelope"></i> Email:</label>
+                    <input type="email" name="email" id="reg_email" 
+                           class="form-control" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_password"><i class="fas fa-lock"></i> Password:</label>
+                    <input type="password" name="password" id="reg_password" 
+                           class="form-control" placeholder="Create a password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="reg_confirm_password"><i class="fas fa-lock"></i> Confirm Password:</label>
+                    <input type="password" name="confirm_password" id="reg_confirm_password" 
+                           class="form-control" placeholder="Confirm your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-warning" style="width: 100%;">
+                    <i class="fas fa-user-plus"></i> Register as Administrator
+                </button>
+            </form>
+        </div>
+
+        <div style="margin-top: 2rem; text-align: center;">
+            <a href="{{ url_for('index') }}" class="btn btn-info btn-sm">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+function showLogin() {
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginTab').classList.add('active');
+    document.getElementById('registerTab').classList.remove('active');
+    document.getElementById('loginTab').style.background = '#17a2b8';
+    document.getElementById('loginTab').style.color = 'white';
+    document.getElementById('registerTab').style.background = '#f8f9fa';
+    document.getElementById('registerTab').style.color = '#666';
+}
+
+function showRegister() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+    document.getElementById('registerTab').classList.add('active');
+    document.getElementById('loginTab').classList.remove('active');
+    document.getElementById('registerTab').style.background = '#ffc107';
+    document.getElementById('registerTab').style.color = '#212529';
+    document.getElementById('loginTab').style.background = '#f8f9fa';
+    document.getElementById('loginTab').style.color = '#666';
+}
+</script>
+{% endblock %}

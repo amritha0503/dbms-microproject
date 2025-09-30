@@ -1,0 +1,745 @@
+{% extends "base.html" %}
+
+{% block title %}Application Details - Placement System{% endblock %}
+
+{% block content %}
+<div class="content-card">
+    <div class="page-header">
+        <h2><i class="fas fa-user-graduate"></i> Application Details</h2>
+        <p>Complete application and interview tracking</p>
+    </div>
+
+    <!-- Student & Job Information -->
+    <div class="details-grid">
+        <div class="student-card">
+            <h3><i class="fas fa-user"></i> Student Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Name:</label>
+                    <span>{{ application[1] }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Email:</label>
+                    <span>{{ application[2] }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Phone:</label>
+                    <span>{{ application[3] or 'Not provided' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>CGPA:</label>
+                    <span class="cgpa-badge">{{ application[4] }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Department:</label>
+                    <span>{{ application[5] }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Applied Date:</label>
+                    <span>{{ application[12].strftime('%Y-%m-%d %H:%M') if application[12] else 'N/A' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="job-card">
+            <h3><i class="fas fa-briefcase"></i> Job Information</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Company:</label>
+                    <span>{{ application[6] }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Position:</label>
+                    <span>{{ application[7] }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Salary Package:</label>
+                    <span class="salary-badge">₹{{ "{:,.0f}".format(application[9]) if application[9] else 'Not disclosed' }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Current Round:</label>
+                    <span class="status-badge status-{{ application[10].lower().replace(' ', '-') }}">
+                        {{ application[10] }}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <label>Overall Status:</label>
+                    <span class="status-badge status-{{ application[11].lower().replace(' ', '-') }}">
+                        {{ application[11] }}
+                    </span>
+                </div>
+            </div>
+            
+            {% if application[8] %}
+            <div class="job-description">
+                <label>Job Description:</label>
+                <div class="description-content">{{ application[8] }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Resume and Documents -->
+    <div class="documents-section">
+        <h3><i class="fas fa-file-alt"></i> Documents</h3>
+        <div class="documents-grid">
+            {% if application[13] %}
+            <div class="document-item">
+                <i class="fas fa-file-pdf"></i>
+                <span>Resume</span>
+                <a href="{{ url_for('download_resume', filename=application[13].split('/')[-1]) }}" 
+                   class="btn-sm btn-primary">
+                    <i class="fas fa-download"></i> Download
+                </a>
+            </div>
+            {% endif %}
+            
+            {% if application[14] %}
+            <div class="document-item">
+                <i class="fas fa-envelope"></i>
+                <span>Cover Letter</span>
+                <button class="btn-sm btn-info" onclick="showCoverLetter()">
+                    <i class="fas fa-eye"></i> View
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Interview Rounds Timeline -->
+    <div class="interview-timeline">
+        <div class="timeline-header">
+            <h3><i class="fas fa-history"></i> Interview Timeline</h3>
+            {% if application[11] == 'In Progress' %}
+            <a href="{{ url_for('schedule_interview', app_id=application[0]) }}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus"></i> Schedule New Round
+            </a>
+            {% endif %}
+        </div>
+
+        {% if interview_rounds %}
+        <div class="timeline">
+            {% for round in interview_rounds %}
+            <div class="timeline-item">
+                <div class="timeline-marker">
+                    <i class="fas fa-{{ 'check-circle' if round[9] == 'Passed' else 'clock' if round[9] == 'Pending' else 'times-circle' }}"></i>
+                </div>
+                <div class="timeline-content">
+                    <div class="round-header">
+                        <h4>{{ round[1] }}</h4>
+                        <div class="round-badges">
+                            <span class="status-badge status-{{ round[8].lower() }}">{{ round[8] }}</span>
+                            {% if round[9] %}
+                            <span class="result-badge result-{{ round[9].lower() }}">{{ round[9] }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="round-details">
+                        <div class="detail-row">
+                            <div class="detail-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>{{ round[2].strftime('%Y-%m-%d') if round[2] else 'Not scheduled' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-clock"></i>
+                                <span>{{ round[3].strftime('%H:%M') if round[3] else 'Not scheduled' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-{{ 'video' if round[5] == 'Online' else 'building' }}"></i>
+                                <span>{{ round[5] }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-row">
+                            <div class="detail-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>{{ round[4] or 'Location TBD' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-user-tie"></i>
+                                <span>{{ round[6] or 'Interviewer TBD' }}</span>
+                            </div>
+                            {% if round[7] %}
+                            <div class="detail-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>{{ round[7] }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if round[11] and round[12] %}
+                        <div class="score-section">
+                            <i class="fas fa-star"></i>
+                            <span>Score: {{ round[11] }}/{{ round[12] }}</span>
+                            <div class="score-bar">
+                                {% set score_percentage = ((round[11]/round[12])*100)|round(1) if round[12] and round[12] > 0 else 0 %}
+                                <div class="score-fill" data-width="{{ score_percentage }}"></div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if round[10] %}
+                        <div class="feedback-section">
+                            <strong>Feedback:</strong>
+                            <p>{{ round[10] }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if round[13] %}
+                        <div class="admin-notes">
+                            <strong>Admin Notes:</strong>
+                            <p>{{ round[13] }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Update Result Form -->
+                    {% if round[9] == 'Pending' and application[11] == 'In Progress' %}
+                    <div class="update-result">
+                        <form method="POST" action="{{ url_for('update_round_result', round_id=round[0]) }}" class="result-form">
+                            <div class="form-row">
+                                <select name="result" class="form-control" required>
+                                    <option value="">Update Result</option>
+                                    <option value="Passed">Passed</option>
+                                    <option value="Failed">Failed</option>
+                                    <option value="On Hold">On Hold</option>
+                                </select>
+                                <input type="number" name="score" class="form-control" placeholder="Score" 
+                                       min="0" max="{{ round[12] or 100 }}" step="0.01">
+                                <button type="submit" class="btn-sm btn-success">Update</button>
+                            </div>
+                            <textarea name="feedback" class="form-control" placeholder="Feedback..." rows="2"></textarea>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-timeline">
+            <i class="fas fa-calendar-times"></i>
+            <h4>No Interview Rounds Scheduled</h4>
+            <p>Schedule the first interview round to begin the evaluation process.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Admin Comments -->
+    {% if application[15] %}
+    <div class="admin-comments">
+        <h3><i class="fas fa-comment-alt"></i> Admin Comments</h3>
+        <div class="comments-content">{{ application[15] }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="action-footer">
+        <a href="{{ url_for('manage_applications') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Applications
+        </a>
+        {% if application[11] == 'In Progress' %}
+        <a href="{{ url_for('schedule_interview', app_id=application[0]) }}" class="btn btn-primary">
+            <i class="fas fa-calendar-plus"></i> Schedule Interview
+        </a>
+        {% endif %}
+        <div class="status-actions">
+            {% if application[11] != 'Selected' %}
+            <a href="{{ url_for('update_application_status', app_id=application[0], status='Selected') }}" 
+               class="btn btn-success" onclick="return confirm('Mark this application as Selected?')">
+                <i class="fas fa-check"></i> Mark Selected
+            </a>
+            {% endif %}
+            {% if application[11] != 'Rejected' %}
+            <a href="{{ url_for('update_application_status', app_id=application[0], status='Rejected') }}" 
+               class="btn btn-danger" onclick="return confirm('Mark this application as Rejected?')">
+                <i class="fas fa-times"></i> Mark Rejected
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Cover Letter Modal -->
+{% if application[14] %}
+<div id="coverLetterModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Cover Letter</h3>
+            <span class="close" onclick="hideCoverLetter()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>{{ application[14] }}</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.student-card,
+.job-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.student-card h3,
+.job-card h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.info-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.info-item span {
+    color: var(--text-primary);
+}
+
+.cgpa-badge {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.salary-badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: #047857;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.job-description {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.job-description label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.description-content {
+    color: var(--text-primary);
+    line-height: 1.6;
+    background: rgba(102, 126, 234, 0.02);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.documents-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.documents-section h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.documents-grid {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(102, 126, 234, 0.02);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 8px;
+}
+
+.document-item i {
+    color: var(--primary-color);
+    font-size: 1.25rem;
+}
+
+.interview-timeline {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.timeline-header h3 {
+    color: var(--text-primary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.timeline {
+    position: relative;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 30px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-color);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.timeline-marker {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.timeline-marker i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.timeline-content {
+    flex: 1;
+    background: rgba(102, 126, 234, 0.02);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.round-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.round-header h4 {
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.round-badges {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.detail-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-item i {
+    color: var(--primary-color);
+}
+
+.score-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.score-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.score-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--success-color), #059669);
+    transition: width 0.3s ease;
+}
+
+.feedback-section,
+.admin-notes {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.feedback-section strong,
+.admin-notes strong {
+    color: var(--text-primary);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.update-result {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.result-form .form-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.result-form .form-control {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.empty-timeline {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-secondary);
+}
+
+.empty-timeline i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: var(--border-color);
+}
+
+.admin-comments {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.admin-comments h3 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.comments-content {
+    color: var(--text-primary);
+    line-height: 1.6;
+    background: rgba(102, 126, 234, 0.02);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.action-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: rgba(102, 126, 234, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.status-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+.close {
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .timeline-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .round-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .action-footer {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .status-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .result-form .form-row {
+        flex-direction: column;
+    }
+    
+    .detail-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+
+<script>
+function showCoverLetter() {
+    document.getElementById('coverLetterModal').style.display = 'block';
+}
+
+function hideCoverLetter() {
+    document.getElementById('coverLetterModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('coverLetterModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Set score bar widths from data attributes
+document.addEventListener('DOMContentLoaded', function() {
+    const scoreFills = document.querySelectorAll('.score-fill');
+    scoreFills.forEach(function(fill) {
+        const width = fill.getAttribute('data-width');
+        if (width) {
+            fill.style.width = width + '%';
+        }
+    });
+});
+</script>
+{% endblock %}
